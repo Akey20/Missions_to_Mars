@@ -116,12 +116,9 @@ def scrape_hemispheres(browser):
     #list to hold images & titles
     hemisphere_image_urls = []
 
-    #list of all the hemispheres
-    ###links = browser.find_by_css('a.product-item img')
-
     #loop
     for i in range(4):
-        #hemisphere
+       #hemisphere
         hemisphereInfo = {}
         #find the elements on each loop
         browser.find_by_css('a.product-item img')[i].click()
@@ -135,9 +132,10 @@ def scrape_hemispheres(browser):
         
         #append hemisphere object to list
         hemisphere_image_urls.append(hemisphereInfo)
-     
+                
         
-    browser.back()
+        browser.back()
+             
 
     #return hemisphere urls w/titles
     return hemisphere_image_urls
