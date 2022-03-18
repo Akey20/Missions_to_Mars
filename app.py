@@ -5,27 +5,27 @@ import json
 
 
 app  = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/" 
-mongo = PyMongo(app)  
+app.config["MONGO_URI"] = "mongodb://localhost:27017/mars_data_db"
+mongo = PyMongo(app)
 
 @app.route("/")
 def index():
-    return "index route"
+    mars_data = mongo.db.marsData.find_one()
+    # print(mars_data)
+    return render_template("index.html", mars=mars_data)
 
 @app.route("/scrape")
 def scrape():
-    marsTable = mongo.db.marsData  
-    # mongo.db.marsData.drop()  
-    # test to call scrape_mars.py
-    mars_data = scrape_mars.scrape_all() 
-    # mars_d = json.dumps(mars_data)
-    # print(mars_data)  
-    # return mars_data
+    marsTable = mongo.db.marsData
+    mongo.db.marsData.drop()
 
+    mars_data = scrape_mars.scrape_all()
     marsTable.insert_one(mars_data)
-    return mars_data  
-    
+
+    return redirect("/")
+
+      
 
     
 if __name__ == "__main__":
-    app.run(port=8000)   
+    app.run()   

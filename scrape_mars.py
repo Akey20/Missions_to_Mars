@@ -148,4 +148,3 @@ def scrape_hemispheres(browser):
 
 if __name__ == "__main__":
     print(scrape_all())
-    
