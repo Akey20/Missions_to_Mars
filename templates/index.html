@@ -1,74 +1,63 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission to Mars</title>
-    ##<link rel="icon" href="javascript.png" type="image/x-icon" />
-   <link rel="stylesheet" 
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Mars</title>
 </head>
-
 <body>
+    <a href="/scrape">SCRAPE NEW DATA</a>
+    <header>
+        <h1>Latest Mars News</h1>
+      </header>
+    
+    <hr>
+    <h1>{{mars.news_title}}</h1>
+    <h2>{{mars.news_p}}</h2>
+
     <div class="container">
-       <div class="jumbotron text-center">
-           <h1>Mission to Mars</h1>
-           <p><a class="btn btn-primary btn-lg" href="/scrape" role="button">Scrape new Data</a></p>
-
-       </div> 
-
-       <div class="row" id="mars-news">
-           <div class="col-md-12">
-               <div class="media-body">
-                   <h2>Latest Mars News</h2>
-                   <h4 class="media-heading">{{ mars.newsTitle}}</h4>
-                   <p>{{ mars.newsParagraph}}</p>
-
-               </div>
-           </div>
-       </div>
-    </div>
-
-    <!-- section for featured image and facts table -->
-    <div class="row" id="mars-featured-image">
-        <div class="col-md-8">
-            <h2>Featured Mars Image</h2>
-
-            <img
-              src="{{mars.featuredImage | default('static/images/error.png', true) }}"
-              class="img-responsive"
-              alt="Responsive image"
-            /> 
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Featured Image</h3>
+                <img src="{{mars.featured_image}}">
+            </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="row" id="mars-facts">
-                <h4>Mars Facts</h4>
-                {{ mars.facts | safe}}
+        <div class="row">    
+            <div class="col-md-6">
+                <h3>Mars Facts</h3>
+                {{mars.mars_table | safe}}
             </div>
         </div>
     </div>
 
-    <!-- Mars Hemispheres -->
-    <div class="row" id="mars-hemispheres">
-        <div class="page-header">
-            <h2 class="text-center">Mars Hemispheres</h2>
-        </div>
-
-        {% for hemisphere in mars.hemispheres %}
-        <div class="col-md-3">
-            <div class="thumbnail">
-                <img src="{{hemisphere.img_url | default('static/images/error.png', true)}}" alt="...">
-                <div class="caption">
-                    <h3>{{hemisphere.title</h3>
-                </div>
+    <div class="container">
+        <div class = "row">
+            <div class="col-md-6">
+                <h3>Hemispheres</h3>
             </div>
         </div>
-        { % endfor % }
     </div>
+        
+    {% for h in mars.hemispheres %}
+    <div class="container">
+        <div class = "row">
+            <div class="col-md-6">
+                <img src="{{h.url}}">
+                <h4>{{h.title}}</h4>
+            </div>
+        </div>
 
+    </div>
+    {% endfor %}
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+    
 </body>
-
 </html>
+

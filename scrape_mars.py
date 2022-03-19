@@ -1,150 +1,87 @@
 #imports
-#import splinter, beautiful soup and pandas
 from splinter import Browser
-from bs4 import BeautifulSoup as soup
+from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
-import html5lib
 import pandas as pd
-import datetime as dt
+import time
+import requests
+import json
 
-#scrape function and return a json that has the data, so it can be loaded into mongoDB
-def scrape_all():
-    #setup splinter
+
+def scrape_info():
+    
+    #  init_browser()
     executable_path = {'executable_path': ChromeDriverManager().install()}
-    browser = Browser('chrome', **executable_path, headless = False)
+    browser = Browser('chrome', **executable_path, headless=False)
 
-    #get information from news page
-    ##scrape_news(browser)
-    news_title, news_paragraph = scrape_news(browser)
+    # Mars News
+    url = "https://redplanetscience.com/"
+    browser.visit(url)
 
-    #dictionary using information from scrapes
-    mars_Data = {
-        "newsTitle": news_title,
-        "newsParagraph": news_paragraph,
-        "featuredImage": scrape_feature_img(browser),
-        "facts": scrape_facts_page(browser),
-        "hemispheres": scrape_hemispheres(browser),
-        "lastUpdated": dt.datetime.now
-    }
+    time.sleep(1)
 
-    #stop the webdriver
+    html = browser.html
+    soup = BeautifulSoup(html, "html.parser")
+    
+    data = {}
+
+    data["news_title"] = soup.find("div", class_="content_title").get_text()
+    data["news_p"] = soup.find("div", class_="article_teaser_body").get_text()
+    data["featured_image"] = get_featured(browser)
+    data["mars_table"] = get_table()
+    data["hemispheres"] = get_hemispheres(browser)
+
     browser.quit()
+
+    return data
+
+
+
+def get_featured(browser):
     
-    #display data
-    return mars_Data
-   
-
-#scrape mars news page
-def scrape_news(browser):
-    #go to news site
-    url = 'https://redplanetscience.com/'
+    #JPL Mars Space Images - Featured Image
+    url = "https://spaceimages-mars.com/"
     browser.visit(url)
-    #optional delay for loading page
-    # browser.is_element_present_by_css('div.list_text', wait_time=1)
 
-   #convert html to soup object
-   #convert to soup object
     html = browser.html
-    news_soup = soup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
 
-    slide_elem = news_soup.select_one('div.list_text')
-    #find the first 'a' tag and save it as news_title
-    news_title = slide_elem.find('div', class_ = 'content_title').get_text()
-    #grabs the paragraph text
-    news_p = slide_elem.find('div', class_='article_teaser_body').get_text()
+    image = soup.body.find_all("img")[1]
+   
+    featured_image_url = url + "image/featured/mars2.jpg"
     
-    #return the news title & paragraph
-    return news_title, news_p
+    return featured_image_url
 
-#scrape image page
-def scrape_feature_img(browser):
-    url = 'https://spaceimages-mars.com'
+
+
+def get_table():
+    
+    #Mars Facts
+    url = "https://galaxyfacts-mars.com/"
+    tables = pd.read_html(url)
+
+    df = tables[0] 
+
+    html_table = df.to_html()
+     
+    html_table.replace('\n', '')
+
+    return df.to_html()
+
+
+
+def get_hemispheres(browser):
+    #Mars Hemispheres
+    url = 'https://marshemispheres.com/'
     browser.visit(url)
 
-    #find and click full image button
-    full_image_link = browser.find_by_tag('button')[1]
-    full_image_link.click()
-
-        #parse html with soup
-    ###html = browser.html
-    ###img_soup = soup(html, 'html.parser')
-        #image url
-   ### img_url_rel = img_soup = img_soup.find('img', class_='fancybox-img').get('src')
-    html = browser.html
-    img_soup = soup(html, 'html.parser')
-    img = img_soup.find('img', class_='headerimage fade-in')
-    img_link = img['src']
-
-    featured_image_url = url + img_link
-
-       
-        #absolute url
-    url_2 = 'https://spaceimages-mars.comimage/featured/mars2.jpg'
-    ###img_url = f'https://spaceimages-mars.com/{img_url_rel}'
-
-    ###return img_url
-        
-    return url_2
-
-
-
-#scrape facts page
-def scrape_facts_page(browser):
-    url = 'https://galaxyfacts-mars.com/'
-    browser.visit(url)
-    html = browser.html
-    fact_soup = soup(html, 'html.parser')
-
-    #find location for facts
-    factsLocation = fact_soup.find('div', class_="diagram mt-4")
-    factTable = factsLocation.find('table')
-
-    #create empty string
-    facts = ""
-    # add text then return
-    facts += str(factTable)
-    return facts
-
-   
-
-#scrape hemispheres page
-def scrape_hemispheres(browser):
-    #url
-    url= "https://marshemispheres.com/"
-    browser.visit(url)
-
-    #list to hold images & titles
-    hemisphere_image_urls = []
-
-    #loop
-    for i in range(4):
-       #hemisphere
-        hemisphereInfo = {}
-        #find the elements on each loop
-        browser.find_by_css('a.product-item img')[i].click()
-        #find sample image anchor tag and extract
-        sample = browser.links.find_by_text('Sample').first
-        # print(sample)
-        hemisphereInfo["img_url"] = sample['href']
-            
-        #get hemisphere title
-        hemisphereInfo['title']= browser.find_by_css('h2.title').text
-        
-        #append hemisphere object to list
-        hemisphere_image_urls.append(hemisphereInfo)
-                
-        
+    all_hemispheres = []
+    for num in range(4):
+        browser.find_by_css("a.product-item img")[num].click()
+        all_hemispheres.append({
+            'title':browser.find_by_css('h2.title')[0].text,
+            'url':browser.find_by_text('Sample')[0]['href']
+        })
         browser.back()
-             
 
-    #return hemisphere urls w/titles
-    return hemisphere_image_urls
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    print(scrape_all())
+    return all_hemispheres
